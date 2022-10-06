@@ -182,7 +182,7 @@ output {
    }
  }
  ```
- - Volvemos a lanzar tanto logstash como el script de la Raspberry (`sudo python test.py {11 o 22 dependiendo del modelo} {GPIO pin conectado}`) y visualizamos por la pantalla de logstash
+ - Volvemos a lanzar tanto logstash como el script de la Raspberry (`sudo python start_sensor_logging.py {11 o 22 dependiendo del modelo} {GPIO pin conectado}`) y visualizamos por la pantalla de logstash
  - Si se rellenan los nuevos campos de logstash, mandaremos como output a elastic, como se puede ver al principio del archivo
 
 ## Gestión de Kibana
