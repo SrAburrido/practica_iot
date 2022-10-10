@@ -145,6 +145,75 @@ output {
  - Desde `Visualize` creamos nuestras gráficas y visualizaciones
  - Desde `Dashboard` podemos crear paneles que agrupen distintos gráficos y visualizaciones
 
+## Conexión con ficheros (ejemplo fútbol)
+
+Configuramos un fichero de configuración para Logstash con la siguiente información:
+```
+input {
+  file {
+      path => "/home/usuario/iot/worldcup.log"
+      start_position => beginning
+  }
+}
+
+filter {}
+
+output {
+  stdout {}
+}
+```
+Ejecutamos Logstash:
+```
+./bin/logstash -f worldcup-logstash.conf
+```
+
+Si vemos que nos sale la información por pantalla con la siguiente estructura:
+```
+{
+          "path" => "/home/.../worldcup.log",
+       "message" => "H-Russia-19-4-Defender-34-CSKA Moscow-Sergei Ignashevich-0",
+          "host" => "sraburrido-pc",
+      "@version" => "1",
+    "@timestamp" => 2022-10-10T15:05:20.502Z
+}
+```
+La configuración estará yendo correctamente. Ahora vamos a cambiar el fichero de configuración para formatear los campos de cada línea:
+```
+filter {
+  grok {
+    match => { 'message' => '%{WORD:grupo}\-%{GREEDYDATA:pais}\-%{INT:ranking}\-%{INT:camiseta}\-%{WORD:posicion}\-%{INT:edad}\-%{GREEDYDATA:club}\-%{GREEDYDATA:nombre}\-%{INT:capitan}' }
+  }
+}
+```
+
+Si la salida por pantalla tiene la información estructurada por pantalla, significa que lo hemos hecho correctamente:
+```
+{
+    "@timestamp" => 2022-10-10T15:48:35.148Z,
+         "grupo" => "H",
+          "pais" => "Russia",
+      "camiseta" => "21",
+          "edad" => "22",
+       "ranking" => "19",
+      "@version" => "1",
+        "nombre" => "Maksim Kanunnikov",
+       "message" => "H-Russia-19-21-Forward-22-Rubin Kazan-Maksim Kanunnikov-0",
+          "path" => "/home/.../worldcup.log",
+          "club" => "Rubin Kazan",
+       "capitan" => "0",
+      "posicion" => "Forward"
+}
+```
+
+Ahora ya sólo quedaría mandar esta info a Elasticsearch:
+```
+output {
+    elasticsearch { hosts => ["localhost:9200"] }
+    stdout { codec => rubydebug } #Codificarlo de una manera más estructurada y legible en consola
+}
+```
+Accedemos a Kibana, e intentamos acceder a los datos, representar gráficas, hacer cálculos con ellos... Y realizamos el mismo proceso con el fichero de sensores.
+
 ## Conexión con la Raspberri Pi
 
  - Para mayor facilidad, conectar por HDMI a cualquier monitor
